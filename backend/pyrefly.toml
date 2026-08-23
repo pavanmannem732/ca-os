@@ -1,0 +1,13 @@
+# Pyrefly type checker configuration
+# https://pyrefly.org/en/stable/configuration/
+
+python_interpreter = "E:/CA_Project/.venv/Scripts/python.exe"
+python_version = "3.12"
+
+# Ignore third-party packages that only ship stubs (no source)
+# This suppresses the "stubs bundled but source not found" warning
+ignore_missing_source = true
+
+[errors]
+# Suppress stub-only package warnings globally
+missing_module_source = false

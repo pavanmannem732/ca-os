@@ -1,0 +1,33 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+
+# Node
+node_modules/
+.next/
+dist/
+build/
+
+# Environment & secrets
+.env
+.env.local
+.env.*.local
+*.secret
+credentials.json
+
+# Storage & logs
+storage/
+logs/
+*.log
+
+# IDE
+.vscode/
+.idea/
+.cursor/
+
+# OS
+.DS_Store
+Thumbs.db

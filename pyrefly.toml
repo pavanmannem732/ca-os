@@ -1,0 +1,7 @@
+# Pyrefly configuration at project root
+python_interpreter = "E:/CA_Project/.venv/Scripts/python.exe"
+python_version = "3.12"
+ignore_missing_source = true
+
+[errors]
+missing_module_source = false
