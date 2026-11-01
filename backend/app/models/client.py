@@ -54,7 +54,7 @@ class Client(Base, TimestampMixin, AuditMixin):
     retainer_fee_monthly: Mapped[Optional[float]] = mapped_column(NUMERIC(12, 2), nullable=True)
     currency: Mapped[str] = mapped_column(String(3), default="INR")
     
-    assigned_primary_staff_id: Mapped[Optional[PyUUID]] = mapped_column(SqlUUID, ForeignKey("users.id"), nullable=True)
+    assigned_primary_staff_id: Mapped[Optional[PyUUID]] = mapped_column(SqlUUID, ForeignKey("users.uuid_id"), nullable=True)
     assigned_staff_ids: Mapped[Optional[List[PyUUID]]] = mapped_column(ARRAY(SqlUUID), nullable=True)
     
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)

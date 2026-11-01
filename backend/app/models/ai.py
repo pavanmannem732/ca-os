@@ -19,7 +19,7 @@ class AIDraft(Base, TimestampMixin):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     firm_id: Mapped[UUID] = mapped_column(ForeignKey("firms.id"), nullable=False, index=True)
     client_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("clients.id"), nullable=True)
-    created_by: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    created_by: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.uuid_id"), nullable=True)
     
     draft_type: Mapped[AIDraftType] = mapped_column(
         SQLEnum(AIDraftType, name="aidrafttype", values_callable=lambda x: [e.value for e in x], create_type=False),

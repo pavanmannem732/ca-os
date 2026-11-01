@@ -81,6 +81,34 @@ class FirmRegistrationSchema(BaseModel):
         return v.strip()
 
 
+class LoginSchema(BaseModel):
+    email: Optional[str] = None
+    mobile: Optional[str] = None
+    password: str
+
+
+@router.post("/login", status_code=status.HTTP_200_OK)
+async def login(
+    body: LoginSchema,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
+    identifier = body.email or body.mobile
+    if not identifier:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Email or mobile is required")
+    result = await AuthService.login_with_password(identifier, body.password, db)
+    response.set_cookie(
+        key="refresh_token",
+        value=result["refresh_token"],
+        httponly=True,
+        secure=True,
+        samesite="strict",
+        max_age=7 * 24 * 3600,
+        path="/api/v1/auth",
+    )
+    return {"data": {k: v for k, v in result.items() if k != "refresh_token"}}
+
 # ─── Routes ─────────────────────────────────────────────────────────────────
 
 @router.post("/request-otp", status_code=status.HTTP_200_OK)

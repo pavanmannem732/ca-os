@@ -43,8 +43,8 @@ class ComplianceTask(Base, TimestampMixin, AuditMixin):
     status: Mapped[TaskStatus] = mapped_column(default=TaskStatus.NOT_STARTED, index=True)
     priority: Mapped[TaskPriority] = mapped_column(default=TaskPriority.MEDIUM)
     
-    assigned_to_id: Mapped[Optional[PyUUID]] = mapped_column(SqlUUID, ForeignKey("users.id"), nullable=True)
-    assigned_by_id: Mapped[Optional[PyUUID]] = mapped_column(SqlUUID, ForeignKey("users.id"), nullable=True)
+    assigned_to_id: Mapped[Optional[PyUUID]] = mapped_column(SqlUUID, ForeignKey("users.uuid_id"), nullable=True)
+    assigned_by_id: Mapped[Optional[PyUUID]] = mapped_column(SqlUUID, ForeignKey("users.uuid_id"), nullable=True)
     assigned_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     
     documents_required: Mapped[List[str]] = mapped_column(ARRAY(String), default=list)

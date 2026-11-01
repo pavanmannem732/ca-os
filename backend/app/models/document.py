@@ -48,7 +48,7 @@ class Document(Base, TimestampMixin, AuditMixin):
     document_period: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     
     upload_source: Mapped[str] = mapped_column(String(50), nullable=False)
-    uploaded_by_user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    uploaded_by_user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.uuid_id"), nullable=True)
     uploaded_by_client: Mapped[bool] = mapped_column(default=False)
     
     virus_scan_status: Mapped[str] = mapped_column(String(20), default="pending")

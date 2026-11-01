@@ -61,7 +61,7 @@ class WhatsAppMessage(Base, TimestampMixin):
     meta_message_id: Mapped[Optional[str]] = mapped_column(String(100), unique=True, nullable=True)
     direction: Mapped[MessageDirection] = mapped_column(SQLEnum(MessageDirection, name="msg_direction_enum", values_callable=lambda x: [e.value for e in x]), nullable=False)
     sender_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    sender_user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    sender_user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.uuid_id"), nullable=True)
     message_type: Mapped[MessageType] = mapped_column(SQLEnum(MessageType, name="msg_type_enum", values_callable=lambda x: [e.value for e in x]), nullable=False)
     body: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     media_url: Mapped[Optional[str]] = mapped_column(String(1000), nullable=True)

@@ -26,6 +26,83 @@ logger = logging.getLogger(__name__)
 
 
 class AuthService:
+    @staticmethod
+    async def login_with_password(identifier: str, password: str, db: AsyncSession) -> dict:
+        """Unified Auth — Login with email or mobile and password."""
+        from uuid import uuid4
+        from app.models.firm import Firm, FirmType, PlanType, PlanStatus
+        from app.core.security import verify_password
+
+        clean_id = identifier.strip()
+        if "@" in clean_id:
+            stmt = select(User).where(User.email.ilike(clean_id))
+        else:
+            raw_mobile = clean_id.lstrip("+91").lstrip("91")
+            stmt = select(User).where((User.mobile == raw_mobile) | (User.mobile == clean_id) | (User.phone == clean_id))
+
+        result = await db.execute(stmt)
+        user = result.scalar_one_or_none()
+        if not user or not user.hashed_password:
+            raise ValidationError("Invalid email/mobile or password.")
+
+        if not verify_password(password, user.hashed_password):
+            raise ValidationError("Invalid email/mobile or password.")
+
+        if not user.is_active:
+            raise ValidationError("Your account has been deactivated.")
+
+        # If user has no firm, create a default firm
+        if not user.firm_id:
+            default_firm = Firm(
+                name=f"{user.full_name or 'My'} CA Firm",
+                slug=f"firm-{uuid4().hex[:8]}",
+                type=FirmType.SOLE_PROPRIETOR,
+                plan_type=PlanType.STARTER,
+                plan_status=PlanStatus.TRIAL,
+            )
+            db.add(default_firm)
+            await db.flush()
+            user.firm_id = default_firm.id
+            if not user.role:
+                user.role = UserRole.FIRM_OWNER
+
+        user.last_login_at = datetime.now(timezone.utc)
+        user.login_count = (user.login_count or 0) + 1
+        await db.commit()
+        await db.refresh(user)
+
+        role_str = user.role.value if hasattr(user.role, 'value') else str(user.role or "firm_owner")
+        access_token = create_access_token(
+            subject=str(user.id),
+            firm_id=str(user.firm_id) if user.firm_id else None,
+            role=role_str,
+        )
+        refresh_token = create_refresh_token(subject=str(user.id))
+
+        try:
+            await store_session(str(user.id), {
+                "user_id": str(user.id),
+                "firm_id": str(user.firm_id) if user.firm_id else None,
+                "role": role_str,
+            })
+        except Exception:
+            pass
+
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer",
+            "expires_in": settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+            "user": {
+                "id": str(user.id),
+                "full_name": user.full_name,
+                "email": user.email,
+                "mobile": user.mobile,
+                "role": role_str,
+                "firm_id": str(user.firm_id) if user.firm_id else None,
+            },
+        }
+
 
     @staticmethod
     async def request_otp(mobile: str, db: AsyncSession) -> dict:

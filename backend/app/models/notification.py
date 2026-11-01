@@ -30,7 +30,7 @@ class Notification(Base, TimestampMixin):
     id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
     firm_id: Mapped[UUID] = mapped_column(ForeignKey("firms.id", ondelete="CASCADE"), nullable=False, index=True)
     recipient_type: Mapped[str] = mapped_column(String(20), nullable=False)
-    recipient_user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    recipient_user_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.uuid_id"), nullable=True)
     recipient_client_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("clients.id"), nullable=True)
     notification_type: Mapped[str] = mapped_column(String(50), nullable=False)
     channel: Mapped[NotificationChannel] = mapped_column(

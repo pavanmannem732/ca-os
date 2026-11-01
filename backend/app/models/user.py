@@ -25,7 +25,7 @@ class UserRole(str, enum.Enum):
 class User(Base, TimestampMixin):
     __tablename__ = "users"
 
-    id: Mapped[UUID] = mapped_column(primary_key=True, default=uuid4)
+    id: Mapped[UUID] = mapped_column("uuid_id", primary_key=True, default=uuid4)
     firm_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("firms.id", ondelete="SET NULL"), nullable=True, index=True)
 
     full_name: Mapped[str] = mapped_column(String(255), nullable=False)

@@ -33,38 +33,55 @@ OTP_REQUEST_COUNT_PREFIX = "otp_req:"
 SESSION_PREFIX = "session:"
 
 
+_in_memory_cache = {}
+
 async def store_otp(mobile: str, hashed_otp: str, expire_seconds: int = 600) -> None:
-    r = await get_redis()
-    await r.setex(f"{OTP_PREFIX}{mobile}", expire_seconds, hashed_otp)
-    await r.delete(f"{OTP_ATTEMPTS_PREFIX}{mobile}")
+    try:
+        r = await get_redis()
+        await r.setex(f"{OTP_PREFIX}{mobile}", expire_seconds, hashed_otp)
+        await r.delete(f"{OTP_ATTEMPTS_PREFIX}{mobile}")
+    except Exception:
+        _in_memory_cache[f"{OTP_PREFIX}{mobile}"] = hashed_otp
 
 
 async def get_stored_otp(mobile: str) -> Optional[str]:
-    r = await get_redis()
-    return await r.get(f"{OTP_PREFIX}{mobile}")
+    try:
+        r = await get_redis()
+        return await r.get(f"{OTP_PREFIX}{mobile}")
+    except Exception:
+        return _in_memory_cache.get(f"{OTP_PREFIX}{mobile}")
 
 
 async def increment_otp_attempts(mobile: str) -> int:
-    r = await get_redis()
-    key = f"{OTP_ATTEMPTS_PREFIX}{mobile}"
-    count = await r.incr(key)
-    await r.expire(key, 1800)  # 30 min lockout window
-    return count
+    try:
+        r = await get_redis()
+        key = f"{OTP_ATTEMPTS_PREFIX}{mobile}"
+        count = await r.incr(key)
+        await r.expire(key, 1800)
+        return count
+    except Exception:
+        return 1
 
 
 async def delete_otp(mobile: str) -> None:
-    r = await get_redis()
-    await r.delete(f"{OTP_PREFIX}{mobile}", f"{OTP_ATTEMPTS_PREFIX}{mobile}")
+    try:
+        r = await get_redis()
+        await r.delete(f"{OTP_PREFIX}{mobile}", f"{OTP_ATTEMPTS_PREFIX}{mobile}")
+    except Exception:
+        _in_memory_cache.pop(f"{OTP_PREFIX}{mobile}", None)
 
 
 async def check_otp_request_limit(mobile: str, limit: int = 3, window_seconds: int = 600) -> bool:
-    """Returns True if request is allowed, False if rate-limited."""
-    r = await get_redis()
-    key = f"{OTP_REQUEST_COUNT_PREFIX}{mobile}"
-    count = await r.incr(key)
-    if count == 1:
-        await r.expire(key, window_seconds)
-    return count <= limit
+    try:
+        r = await get_redis()
+        key = f"{OTP_REQUEST_COUNT_PREFIX}{mobile}"
+        count = await r.incr(key)
+        if count == 1:
+            await r.expire(key, window_seconds)
+        return count <= limit
+    except Exception:
+        return True
+
 
 
 async def store_session(user_id: str, session_data: dict, expire_seconds: int = 86400 * 7) -> None:

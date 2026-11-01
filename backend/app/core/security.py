@@ -9,12 +9,23 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 
-# Explicitly configure CryptContext to handle modern bcrypt backends
+# Explicitly configure CryptContext to handle modern bcrypt backends and argon2
 pwd_context = CryptContext(
-    schemes=["bcrypt"], 
+    schemes=["bcrypt", "argon2"], 
     deprecated="auto",
     bcrypt__ident="2b" 
 )
+
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    try:
+        return pwd_context.verify(plain_password, hashed_password)
+    except Exception:
+        return False
+
+
+def get_password_hash(password: str) -> str:
+    return pwd_context.hash(password)
 
 
 def generate_otp(length: int = 6) -> str:

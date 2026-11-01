@@ -52,7 +52,7 @@ class BillingLog(Base, TimestampMixin):
     firm_id: Mapped[UUID] = mapped_column(ForeignKey("firms.id"), nullable=False)
     client_id: Mapped[UUID] = mapped_column(ForeignKey("clients.id"), nullable=False)
     task_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("compliance_tasks.id"), nullable=True)
-    staff_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
+    staff_user_id: Mapped[UUID] = mapped_column(ForeignKey("users.uuid_id"), nullable=False)
     
     work_date: Mapped[date] = mapped_column(Date, nullable=False)
     hours: Mapped[float] = mapped_column(NUMERIC(5, 2), nullable=False)
@@ -63,5 +63,5 @@ class BillingLog(Base, TimestampMixin):
     is_billable: Mapped[bool] = mapped_column(default=True)
     invoice_id: Mapped[Optional[UUID]] = mapped_column(ForeignKey("invoices.id"), nullable=True)
     
-    approved_by: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.id"), nullable=True)
+    approved_by: Mapped[Optional[UUID]] = mapped_column(ForeignKey("users.uuid_id"), nullable=True)
     approved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
